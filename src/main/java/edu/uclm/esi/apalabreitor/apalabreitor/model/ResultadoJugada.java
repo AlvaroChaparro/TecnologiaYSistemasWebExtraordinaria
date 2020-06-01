@@ -14,7 +14,16 @@ public class ResultadoJugada {
 	private String letrasNuevas;
 	private boolean turno;
 	private String tablero;
+	private boolean quedanLetras = true;
 	
+	public boolean isQuedanLetras() {
+		return quedanLetras;
+	}
+
+	public void setQuedanLetras(boolean quedanLetras) {
+		this.quedanLetras = quedanLetras;
+	}
+
 	public ResultadoJugada() {
 		this.valid=new ArrayList<>();
 		this.invalid = new ArrayList<>();
@@ -114,6 +123,7 @@ public class ResultadoJugada {
 		jso.put("turno", this.turno);
 		jso.put("type", "resultado");
 		jso.put("tablero", tablero);
+		jso.put("quedanLetras", this.quedanLetras);
 		return jso;
 	}
 

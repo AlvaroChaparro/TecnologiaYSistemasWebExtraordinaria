@@ -9,8 +9,8 @@
     border: 8px solid rgba(0,0,0,0.6);
     background-clip: content-box;
     background-color: #FAFAFA;
-    min-width: 400px;
-    min-height: 400px;
+    /*min-width: 400px;
+    min-height: 400px;*/
 }
 
 .scrabble-td {
@@ -20,6 +20,7 @@
     background-color: #EFEBE9;
     padding: 1.2em;
     width: 3.096vw;
+    height: 3.096vw;
     font-size: 0.8vw;
     line-height: 0.8vw;
     display: inline-block;

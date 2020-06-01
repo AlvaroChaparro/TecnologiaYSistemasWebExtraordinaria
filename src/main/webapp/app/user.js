@@ -23,6 +23,29 @@ function UserViewModel() {
 	
 	this.message = ko.observable();
 	
+    self.timer = ko.observable();
+    // Cuando se acaban las letras se activa
+    // y se deja una ultima jugada a cada jugador
+    // antes de acabar
+    self.ultimaJugada = false;
+
+    self.minutes = ko.computed( function() {
+        return Math.floor(self.timer() / 60) % 60;
+    }, self);
+
+    self.seconds = ko.computed( function() {
+        return self.timer() % 60;
+    }, self);
+
+
+	setInterval(function() {
+		if (self.timer() !== null){
+			var newTimer = self.timer() -1;
+	        self.timer(newTimer == 0 ? document.getElementById("btnPasarTurno").click() : newTimer);
+		}
+    }, 1000);
+
+	
 	this.nuevaPartida = function() {
 		var info = {
 			action : "Nueva partida"
@@ -38,6 +61,7 @@ function UserViewModel() {
 	}
 	
 	function partidaOK(respuesta) {
+		$("#message").attr("style", "color:blue");
 		self.message(respuesta);
 		respuesta=JSON.parse(respuesta);
 		if (respuesta.idPartida)
@@ -53,35 +77,50 @@ function UserViewModel() {
 				};
 				self.ws.send(JSON.stringify(mensaje));
 			} else if (respuesta.type == "PARTIDA CREADA") {
+				$("#message").attr("style", "color:blue");
 				self.messageSalaDeEspera(self.userName() + ", espera a que llegue un oponente");
 			}	
 		}
 		self.ws.onerror = function(event) {
+			$("#message").attr("style", "color:red");
 			self.message("Error");
 		}
 		self.ws.onclose = function(event) {
+			$("#message").attr("style", "color:red");
 			self.message("WebSocket cerrado");
 		}
 		self.ws.onmessage = function(event) {
 			var jso = event.data;
 			jso = JSON.parse(jso);
+			$("#message").attr("style", "color:blue");
 			self.message(event.data);
 			if (jso.type == "START") {
 				var r = (jso.turno ? "Tienes " : "No tienes ") + "el turno. Tus letras son: " + jso.letras;
 				$("#btnJugar").attr("disabled", !jso.turno);
 				$("#btnPasarTurno").attr("disabled", !jso.turno);
 				$("#btnNuevasLetras").attr("disabled", !jso.turno);
+				$("#btnMezclar").attr("disabled", !jso.turno);
+				$("#btnLlamarLetras").attr("disabled", !jso.turno);
+				if(jso.turno){
+					self.timer(120);
+				}else{
+					self.timer(null);
+				}				
+				
 				self.miTurno(jso.turno? ">" : "");
 				self.turnoDeOponente(jso.turno ? "" : ">");
 				self.showSalaDeEspera(false);
 				self.showTablero(true);
 				self.showRegLog(false);
 				self.nombreOponente(jso.oponente);
+				$("#message").attr("style", "color:blue");
 				self.message(r);
 				for (var i=0; i<jso.letras.length; i++)
 					self.tablero().panel.push(jso.letras[i]);
+				$('#divPanelButtons *').prop('disabled', !jso.turno);
 			} else if (jso.type == "resultado") {
 				if (jso.invalid.length != 0){
+					$("#message").attr("style", "color:red");
 					self.message(JSON.stringify(jso.invalid) + " is invalid");
 					var invalid = jso.invalid;
 					for (var i=0; i<invalid.length; i++) {
@@ -89,12 +128,18 @@ function UserViewModel() {
 						self.secuenciasPropias.push(secuencia);
 					}
 				}else if (jso.exceptions.length != 0){
+					$("#message").attr("style", "color:red");
 					self.message(JSON.stringify(jso.exceptions));
 				}else {
 					$("#btnJugar").attr("disabled", !jso.turno);
 					$("#btnPasarTurno").attr("disabled", !jso.turno);
+					$("#btnLlamarLetras").attr("disabled", !jso.turno);
 					$("#btnNuevasLetras").attr("disabled", !jso.turno);
-					if (jso.turno) {						
+					$("#btnMezclar").attr("disabled", !jso.turno);
+					$('#divPanelButtons *').prop('disabled', !jso.turno);
+
+					if (jso.turno) {
+						self.timer(120);
 						self.miTurno(">");
 						self.turnoDeOponente("");
 						var puntos=0;
@@ -109,7 +154,22 @@ function UserViewModel() {
 						}
 						self.puntosOponente(self.puntosOponente() + puntos);
 						actualizarTablero(jso.tablero);
+						
+						// Control de letras restantes
+						if(!jso.quedanLetras){
+							$("#btnNuevasLetras").attr("disabled", true);
+							$("#message").attr("style", "color:red");
+							self.message("No quedan mas letras");
+							if(self.ultimaJugada){
+								terminarPartida();
+							}else{
+								self.ultimaJugada = true;
+							}
+						}else{
+							$("#btnNuevasLetras").attr("disabled", false);
+						}
 					} else { 
+						self.timer(null);
 						self.miTurno("");
 						self.turnoDeOponente(">");
 						var valid = jso.valid;
@@ -127,14 +187,43 @@ function UserViewModel() {
 						if (jso.letrasNuevas)
 							for (var i=0; i<jso.letrasNuevas.length; i++)
 								self.tablero().panel.push(jso.letrasNuevas[i]);
-						console.log(jso.tablero);
 						actualizarTablero(jso.tablero);
+						
+						// Control de letras restantes
+						if(!jso.quedanLetras){
+							$("#btnNuevasLetras").attr("display", "none");
+							$("#message").attr("style", "color:red");
+							self.message("No quedan mas letras");
+						}
 					}
 				}
 			} else if (jso.type=="VICTORIA") {
-				self.message("Has ganado");
+				alert("HAS GANADO!");
+				$.get("/salir", function() {
+					window.location.reload();			
+				});
+			} else if (jso.type=="DERROTA") {
+				alert("HAS PERDIDO!");
+				$.get("/salir", function() {
+					window.location.reload();			
+				});
+			} else if (jso.type=="EMPATE") {
+				alert("HAS EMPATADO!");
+				$.get("/salir", function() {
+					window.location.reload();			
+				});
 			}
 		}
+	}
+	
+	function terminarPartida() {
+		var msg = {
+			type : "TERMINAR",
+			idPartida : sessionStorage.idPartida,
+			puntosA : self.misPuntos(),
+			puntosB : self.puntosOponente()
+		};
+		self.ws.send(JSON.stringify(msg));
 	}
 	
 	function actualizarTablero(tablero) {
@@ -171,6 +260,7 @@ function UserViewModel() {
 	}
 	
 	function mostrarUsuarios(respuesta) {
+		$("#message").attr("style", "color:blue");
 		self.message(JSON.stringify(respuesta));
 	}
 	
@@ -185,7 +275,7 @@ function UserViewModel() {
 			url : "/login",
 			type : "post",
 			success : loginOk,
-//			success : self.loginOk,
+// success : self.loginOk,
 			error : error
 		};
 		$.ajax(data);
@@ -223,11 +313,11 @@ function UserViewModel() {
 	}
 	
 	function loginOk(){
-//	this.loginOk() = function() {
-		$("#message").attr("style", "color:blue");
+// this.loginOk() = function() {
 		self.showSalaDeEspera(true);
 		self.showTablero(false);
 		self.showRegLog(false);
+		$("#message").attr("style", "color:blue");
 		self.messageSalaDeEspera("Bienvenid@" + self.userName());
 	}
 	
@@ -325,7 +415,15 @@ class Tablero {
 	}
 	
 	rendirse() {
-		
+		var msg = {
+			type : "ABANDONO",
+			idPartida : sessionStorage.idPartida
+		};
+		self.ws.send(JSON.stringify(msg));
+		alert("TE HAS RENDIDO");
+		$.get("/salir", function() {
+			window.location.reload();			
+		});
 	}
 	
 	jugar() {
@@ -344,14 +442,14 @@ class Tablero {
 		};
 		self.ws.send(JSON.stringify(msg));
 		
-//		 Despues de un error se mezcla la jugada erronea
-//		 con la siguiente, por lo que hay que limpiar
-//		 el array de casillas jugadas
-//		 UPDATE: este cambio deja de ser necesario al
-//		 arreglar la validacion de la primera jugada
-//		self.tablero().casillasJugada = [];
+// Despues de un error se mezcla la jugada erronea
+// con la siguiente, por lo que hay que limpiar
+// el array de casillas jugadas
+// UPDATE: este cambio deja de ser necesario al
+// arreglar la validacion de la primera jugada
+// self.tablero().casillasJugada = [];
 		
-//		console.log(this);
+// console.log(this);
 	}
 	
 	nuevasLetras() {

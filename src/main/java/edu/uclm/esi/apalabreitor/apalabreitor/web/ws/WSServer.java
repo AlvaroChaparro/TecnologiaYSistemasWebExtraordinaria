@@ -57,7 +57,16 @@ public class WSServer extends TextWebSocketHandler {
 			match.pasarTurno();
 			break;
 		case "ABANDONO" :
-			
+			idPartida = jso.getString("idPartida");
+			match = WebController.inPlayMatches.get(idPartida);
+			match.abandono(session.getId());
+			WebController.inPlayMatches.remove(idPartida);
+			break;
+		case "TERMINAR" :
+			idPartida = jso.getString("idPartida");
+			match = WebController.inPlayMatches.get(idPartida);
+			match.terminar(session.getId(),jso.getInt("puntosA"),jso.getInt("puntosB"));
+			WebController.inPlayMatches.remove(idPartida);
 			break;
 		}
 	}

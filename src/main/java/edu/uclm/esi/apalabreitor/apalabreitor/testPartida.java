@@ -1,6 +1,7 @@
 package edu.uclm.esi.apalabreitor.apalabreitor;
 
 import java.util.regex.Pattern;
+
 import java.util.concurrent.TimeUnit;
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -33,12 +34,12 @@ public class testPartida {
 
 	@Test
 	public void testUntitledTestCase() throws Exception {
-		login(driverP1, "alvaro", "123");
+		login(driverP1, "a", "a");
 		WebDriverWait wait = new WebDriverWait(driverP1, 10);
 		WebElement message = driverP1.findElement(By.id("messageSalaDeEspera"));
 		wait.until(ExpectedConditions.textToBePresentInElement(message, "Bienvenid@"));
 		
-		login(driverP2, "whatever", "123");
+		login(driverP2, "b", "b");
 		wait = new WebDriverWait(driverP2, 10);
 		message = driverP2.findElement(By.id("messageSalaDeEspera"));
 		wait.until(ExpectedConditions.textToBePresentInElement(message, "Bienvenid@"));

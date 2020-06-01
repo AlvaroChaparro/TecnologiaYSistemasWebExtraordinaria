@@ -25,6 +25,7 @@ import edu.uclm.esi.apalabreitor.apalabreitor.dao.TokenRepository;
 import edu.uclm.esi.apalabreitor.apalabreitor.dao.UserRepository;
 import edu.uclm.esi.apalabreitor.apalabreitor.model.Match;
 import edu.uclm.esi.apalabreitor.apalabreitor.model.Token;
+import edu.uclm.esi.apalabreitor.apalabreitor.model.TrippleDes;
 import edu.uclm.esi.apalabreitor.apalabreitor.model.User;
 import edu.uclm.esi.apalabreitor.apalabreitor.web.exceptions.LoginException;
 
@@ -90,9 +91,10 @@ public class WebController {
 		if (userRepo.findById(userName).isPresent() || userRepo.findByEmail(email)!=null)
 			throw new Exception("The user already exists");
 		User user=new User();
+		TrippleDes td= new TrippleDes();
 		user.setEmail(email);
 		user.setUserName(userName);
-		user.setPwd(pwd1);
+		user.setPwd(td.encrypt(pwd1));
 		userRepo.save(user);
 	}
 	
@@ -100,13 +102,14 @@ public class WebController {
 	public void login(HttpSession session, 
 			@RequestParam(value="userName") String userName, 
 			@RequestParam(value="pwd") String pwd,
-			@RequestParam boolean withEmail) throws LoginException {
+			@RequestParam boolean withEmail) throws Exception {
 		User user;
 		if (withEmail)
 			user=userRepo.findByEmail(userName);
 		else
 			user=userRepo.findById(userName).get();
-		if (user!=null && user.getPwd().equals(pwd)) {
+		TrippleDes td= new TrippleDes();
+		if (user!=null && td.decrypt(user.getPwd()).equals(pwd)) {
 			session.setAttribute("user", user);
 			this.users.add(user);
 		}

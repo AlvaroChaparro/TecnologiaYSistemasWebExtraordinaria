@@ -9,12 +9,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edu.uclm.esi.apalabreitor.apalabreitor.web.controllers.WebController;
+
 public class Match {
 	private String id;
 	private User playerA;
 	private User playerB;
 	private User jugadorConElTurno;
 	private Board board;
+	private boolean ultimaJugadaA = false;
+	private boolean ultimaJugadaB = false;
 
 	public Match() {
 		this.id = UUID.randomUUID().toString();
@@ -41,6 +45,7 @@ public class Match {
 			jsaA.put("type", "START");
 			jsaA.put("letras", this.board.getLetters(7));
 			jsaA.put("turno", jugadorConElTurno == playerA ? true : false);
+			jsaA.put("oponente", playerB.getUserName());
 			this.playerA.sendMessage(jsaA.toString());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -53,6 +58,7 @@ public class Match {
 			jsaB.put("type", "START");
 			jsaB.put("letras", this.board.getLetters(7));
 			jsaB.put("turno", jugadorConElTurno == playerB ? true : false);
+			jsaB.put("oponente", playerA.getUserName());
 			this.playerB.sendMessage(jsaB.toString());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -74,7 +80,6 @@ public class Match {
 			for (int i = 0; i < jsaJugada.length(); i++)
 				jugada.add(jsaJugada.getJSONObject(i));
 			resultado = this.board.movement(jugada);
-
 			if (resultado.getExceptions().isEmpty() && resultado.invalid().isEmpty()) {
 				resultado.setTurno(false);
 				player.sendMessage(resultado);
@@ -101,13 +106,18 @@ public class Match {
 		cambiarTurno();
 		ResultadoJugada resultado = new ResultadoJugada();
 		resultado.setTurno(true);
+		if(this.board.anyLettersLeft()) {
+			resultado.setQuedanLetras(true);
+		}else {
+			resultado.setQuedanLetras(false);
+		}
 		// TODO Esta excepcion puede darse porque se ha perdido la conexion y hay que
 		// ver como manejarlo
 		try {
 			this.jugadorConElTurno.sendMessage(resultado);
 			resultado.setTurno(false);
-			User otro = (this.playerA == this.jugadorConElTurno ? this.playerB : this.playerA);
-			otro.sendMessage(resultado);
+			User player2 = (this.playerA == this.jugadorConElTurno ? this.playerB : this.playerA);
+			player2.sendMessage(resultado);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -123,6 +133,9 @@ public class Match {
 			player.sendMessage(resultado);
 		} else {
 			String letras = this.board.getLetters(numeroDeLetras);
+			if(letras.length() < 7) {
+				resultado.setQuedanLetras(false);
+			}
 			resultado.setLetrasNuevas(letras);
 			player.sendMessage(resultado);
 			resultado.setTurno(false);
@@ -131,6 +144,43 @@ public class Match {
 			resultado.setTurno(true);
 			resultado.setTablero(board.toString());
 			contrincante.sendMessage(resultado);
+		}
+	}
+	
+	public void abandono(String idSession) throws JSONException {
+		User perdedor = this.playerA.getSession().getId().equals(idSession) ? playerA : playerB;
+		User ganador = this.playerA == perdedor ? playerB : playerA;
+		JSONObject jsaGanador = new JSONObject();
+		jsaGanador.put("type", "VICTORIA");
+		try {
+			ganador.sendMessage(jsaGanador.toString());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void terminar(String idSession, int puntosA, int puntosB) throws JSONException {
+		User player1 = this.playerA.getSession().getId().equals(idSession) ? playerA : playerB;
+		User player2 = this.playerA == player1 ? playerB : playerA;
+		JSONObject jsaPlayer1 = new JSONObject();
+		JSONObject jsaPlayer2 = new JSONObject();
+		if(puntosA > puntosB) {
+			jsaPlayer1.put("type", "VICTORIA");
+			jsaPlayer2.put("type", "DERROTA");
+		}else if(puntosA < puntosB) {
+			jsaPlayer1.put("type", "DERROTA");
+			jsaPlayer2.put("type", "VICTORIA");
+		} else if (puntosA == puntosB) {
+			jsaPlayer1.put("type", "EMPATE");
+			jsaPlayer2.put("type", "EMPATE");
+		}
+		try {
+			player1.sendMessage(jsaPlayer1.toString());
+			player2.sendMessage(jsaPlayer2.toString());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 }
