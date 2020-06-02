@@ -41,7 +41,13 @@ function UserViewModel() {
 	setInterval(function() {
 		if (self.timer() !== null){
 			var newTimer = self.timer() -1;
-	        self.timer(newTimer == 0 ? document.getElementById("btnPasarTurno").click() : newTimer);
+			if(newTimer == 0){
+				document.getElementById("btnLlamarLetras").click();
+				document.getElementById("btnPasarTurno").click();
+			}else{
+				self.timer(newTimer);
+			}
+//	        self.timer(newTimer == 0 ? document.getElementById("btnPasarTurno").click() : newTimer);
 		}
     }, 1000);
 
@@ -127,6 +133,7 @@ function UserViewModel() {
 						secuencia=new Secuencia(invalid[i].sequence, 0, false);
 						self.secuenciasPropias.push(secuencia);
 					}
+					self.tablero().llamarLetras();
 				}else if (jso.exceptions.length != 0){
 					$("#message").attr("style", "color:red");
 					self.message(JSON.stringify(jso.exceptions));
@@ -136,7 +143,7 @@ function UserViewModel() {
 					$("#btnLlamarLetras").attr("disabled", !jso.turno);
 					$("#btnNuevasLetras").attr("disabled", !jso.turno);
 					$("#btnMezclar").attr("disabled", !jso.turno);
-					$('#divPanelButtons *').prop('disabled', !jso.turno);
+					self.tablero().casillasJugada = [];
 
 					if (jso.turno) {
 						self.timer(120);
@@ -154,12 +161,14 @@ function UserViewModel() {
 						}
 						self.puntosOponente(self.puntosOponente() + puntos);
 						actualizarTablero(jso.tablero);
+						// Des/Activar el panel de letras
+						$('#divPanelButtons *').prop('disabled', !jso.turno);
 						
 						// Control de letras restantes
 						if(!jso.quedanLetras){
 							$("#btnNuevasLetras").attr("disabled", true);
 							$("#message").attr("style", "color:red");
-							self.message("No quedan mas letras");
+							self.message(self.message()+"\nNo quedan mas letras. Ultimo movimiento.");
 							if(self.ultimaJugada){
 								terminarPartida();
 							}else{
@@ -188,12 +197,14 @@ function UserViewModel() {
 							for (var i=0; i<jso.letrasNuevas.length; i++)
 								self.tablero().panel.push(jso.letrasNuevas[i]);
 						actualizarTablero(jso.tablero);
+						// Des/Activar el panel de letras
+						$('#divPanelButtons *').prop('disabled', !jso.turno);
 						
 						// Control de letras restantes
 						if(!jso.quedanLetras){
 							$("#btnNuevasLetras").attr("display", "none");
 							$("#message").attr("style", "color:red");
-							self.message("No quedan mas letras");
+							self.message(self.message()+"\nNo quedan mas letras. Ultimo movimiento");
 						}
 					}
 				}
@@ -405,6 +416,7 @@ class Tablero {
 	}
 	
 	llamarLetras() {
+		console.log(this.casillasJugada);
 		var numeroLetras = this.casillasJugada.length;
 		var ids = [];
 		for (var i=0; i<numeroLetras; i++) {
@@ -427,6 +439,7 @@ class Tablero {
 	}
 	
 	jugar() {
+		console.log(this.casillasJugada);
 		var casillas = [];
 		for (var i=0; i<this.casillasJugada.length; i++) {
 			casillas.push({
@@ -447,7 +460,7 @@ class Tablero {
 // el array de casillas jugadas
 // UPDATE: este cambio deja de ser necesario al
 // arreglar la validacion de la primera jugada
-// self.tablero().casillasJugada = [];
+//		self.tablero().casillasJugada = [];
 		
 // console.log(this);
 	}

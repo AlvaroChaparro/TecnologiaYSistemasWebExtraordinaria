@@ -38,7 +38,7 @@ public class WSServer extends TextWebSocketHandler {
 		case "INICIAR PARTIDA" :
 			String idPartida = jso.getString("idPartida");
 			Match match = WebController.inPlayMatches.get(idPartida);
-			match.start();
+			match.start(session.getId());
 			break;
 		case "MOVIMIENTO" : // el jugador ha puesto letras y hay que...
 			idPartida = jso.getString("idPartida");

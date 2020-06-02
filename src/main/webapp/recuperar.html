@@ -4,7 +4,7 @@
 <meta charset="ISO-8859-1">
 <script
 	src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<title>Insert title here</title>
+<title>Email para recuperar Password</title>
 <script type="text/javascript">
 	// It executes bot success and error
 	function askToken() {
@@ -16,7 +16,7 @@
 			url : "solicitarToken",
 			type : "post",
 			success : alert("Se ha enviado el correo"),
-			error : alert("Se ha producido un error")
+			error : alert("Se ha producido un error o el email no existe")
 		};
 		$.ajax(data);
 	}

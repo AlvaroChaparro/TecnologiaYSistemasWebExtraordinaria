@@ -123,7 +123,7 @@ public class WebController {
 	}
 	
 	@PostMapping("/solicitarToken")
-	public void solicitarToken(@RequestParam String email) throws MessagingException {
+	public void solicitarToken(@RequestParam String email) throws Exception {
 		User user;
 		user = userRepo.findByEmail(email);
 		// Aseguramos que el usuario existe
@@ -132,6 +132,8 @@ public class WebController {
 			tokenRepo.save(token);
 			EMailSenderService test = new EMailSenderService();
 			test.enviarPorGmail(email, token.getToken());
+		}else {
+			throw new Exception("El email no existe");
 		}
 		// Falta mandar un mensaje de error maybe
 	}
@@ -139,7 +141,7 @@ public class WebController {
 	@PostMapping("/actualizarPwd")
 	public void actualizarPwd(@RequestParam String token, @RequestParam String pwd1, @RequestParam String pwd2) throws Exception {
 		if (!pwd1.equals(pwd2)) {
-			throw new Exception("..."); //TODO
+			throw new Exception("La contraseñas no son iguales"); //TODO
 		}
 		Optional<Token> elToken = tokenRepo.findById(token);
 		if (elToken.isPresent()) {
@@ -148,7 +150,8 @@ public class WebController {
 				throw new Exception("Token invalido o expirado");
 			}
 			User user = userRepo.findByEmail(t.getEmail());
-			user.setPwd(pwd1);
+			TrippleDes td= new TrippleDes();
+			user.setPwd(td.encrypt(pwd1));
 			userRepo.save(user);
 		}else {
 			throw new Exception("Token invalido o expirado");

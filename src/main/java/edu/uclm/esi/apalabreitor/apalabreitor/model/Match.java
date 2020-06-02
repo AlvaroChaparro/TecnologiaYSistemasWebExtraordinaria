@@ -36,9 +36,12 @@ public class Match {
 		return id;
 	}
 
-	public void start() {
-		this.jugadorConElTurno = new Random().nextBoolean() ? this.playerA : this.playerB;
-		this.board = new Board(); // Aqui podemos hacer un metodo para randomizar y hacer pruebas
+	public void start(String idSession) {
+		// Para testear
+		this.jugadorConElTurno = this.playerA;
+		
+//		this.jugadorConElTurno = new Random().nextBoolean() ? this.playerA : this.playerB;
+		this.board = new Board();
 
 		try {
 			JSONObject jsaA = new JSONObject();

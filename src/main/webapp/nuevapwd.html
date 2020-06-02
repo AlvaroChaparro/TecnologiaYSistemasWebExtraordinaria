@@ -1,0 +1,55 @@
+<head>
+<meta charset="ISO-8859-1">
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<title>Recuperacion de Password</title>
+<script type="text/javascript">
+	
+	const params = new URLSearchParams(document.location.search);
+	token = params.get("code");
+	if (!token) {
+		alert("No ha introducido su token");
+		window.location.replace("http://localhost:8080");
+	}
+
+	function newPassword(){
+		if ($("#pwd1").val() != $("#pwd2").val()){
+			alert("Las contraseñas no son iguales")
+		} else {
+			console
+			var info = {
+                token: token,
+                pwd1: $("#pwd1").val(),
+                pwd2: $("#pwd2").val()
+            };
+
+            var data = {
+                data: info,
+                url: "actualizarPwd",
+                type: "post",
+                success: newPwdOk,
+                error: newPwdError
+            };
+            $.ajax(data);
+		}
+	}
+	
+	function newPwdOk() {
+		alert("Actualizacion correcta. Se le redigirá a la pantalla de login");
+		window.location.replace("http://localhost:8080");
+	}
+	function newPwdError() {
+		alert("Actualizacion incorrecta. Algo salio mal en el servidor");
+	}
+</script>
+</head>
+
+<body>
+	<input type="password" id="pwd1" placeholder="Introduce tu nueva contraseña">
+	<input type="password" id="pwd2" placeholder="Repite tu nueva contraseña">
+	<input type="button" value="Restaurar Password"
+		onclick="newPassword()">
+
+</body>
+
+</html>

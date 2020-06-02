@@ -50,7 +50,8 @@ public class Board {
 
 	public Board() {
 		this.palabrasRepo = Manager.get().getPalabrasRepo();
-		this.disorderLetters();
+//		this.disorderLetters();
+		this.orderLetters();
 		for (int i = 0; i < 15; i++)
 			for (int j = 0; j < 15; j++)
 				squares[i][j] = new Square();
@@ -138,20 +139,52 @@ public class Board {
 	 * Test Method
 	 */
 	private void orderLetters() {
-		for (int i=0; i<10; i++)
-			addPruebas();
-	}
-
-	/**
-	 * Test Method
-	 */
-	private void addPruebas() {
 		addLetter(1, 'P');
 		addLetter(1, 'R');
 		addLetter(1, 'U');
 		addLetter(1, 'E');
 		addLetter(1, 'B');
 		addLetter(1, 'A');
+		addLetter(1, 'S');
+		
+		addLetter(1, 'U');
+		addLetter(1, 'B');
+		addLetter(1, 'L');
+		addLetter(1, 'I');
+		addLetter(1, 'C');
+		addLetter(1, 'A');
+		addLetter(1, 'R');
+		
+		addLetter(1, 'A');
+		addLetter(1, 'B');
+		addLetter(1, 'U');
+		addLetter(1, 'I');
+		addLetter(1, 'L');
+		addLetter(1, 'L');
+		addLetter(1, 'A');
+		
+		addLetter(1, 'A');
+		addLetter(1, 'G');
+		addLetter(1, 'U');
+		addLetter(1, 'A');
+		addLetter(1, 'L');
+		addLetter(1, 'O');
+		addLetter(1, 'S');
+		
+		addLetter(1, 'Z');
+		addLetter(1, 'A');
+		addLetter(1, 'N');
+		addLetter(1, 'J');
+		addLetter(1, 'E');
+		addLetter(1, 'M');
+		addLetter(1, 'O');
+		
+		addLetter(1, 'D');
+		addLetter(1, 'E');
+		addLetter(1, 'S');
+		addLetter(1, 'T');
+		addLetter(1, 'L');
+		addLetter(1, 'O');
 		addLetter(1, 'S');
 	}
 

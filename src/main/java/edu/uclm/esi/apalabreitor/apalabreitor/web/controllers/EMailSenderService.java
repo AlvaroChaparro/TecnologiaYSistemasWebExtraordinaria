@@ -39,7 +39,7 @@ public class EMailSenderService {
 
         MimeMessage msg = new MimeMessage(session);
         msg.setSubject("Apalabreitor - recuperación de contraseña");
-        msg.setText("Pulsa en el siguiente enlace para crear una nueva contraseña: http://...../crearpwd?code=" + codigo);
+        msg.setText("Pulsa en el siguiente enlace para crear una nueva contraseña: http://localhost:8080/nuevapwd.html?code=" + codigo);
         msg.setFrom(new InternetAddress(this.remitente));
         msg.addRecipient(Message.RecipientType.TO, new InternetAddress(destinatario));
         Transport.send(msg);
