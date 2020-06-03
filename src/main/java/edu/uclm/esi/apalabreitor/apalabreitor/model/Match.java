@@ -17,8 +17,6 @@ public class Match {
 	private User playerB;
 	private User jugadorConElTurno;
 	private Board board;
-	private boolean ultimaJugadaA = false;
-	private boolean ultimaJugadaB = false;
 
 	public Match() {
 		this.id = UUID.randomUUID().toString();
@@ -39,8 +37,9 @@ public class Match {
 	public void start(String idSession) {
 		// Para testear
 		this.jugadorConElTurno = this.playerA;
-		
+		// Procedimiento habitual
 //		this.jugadorConElTurno = new Random().nextBoolean() ? this.playerA : this.playerB;
+		
 		this.board = new Board();
 
 		try {
